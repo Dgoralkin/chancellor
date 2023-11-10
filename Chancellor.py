@@ -1,4 +1,4 @@
-# Designed and built by Daniel Gorelkin IT-140-X2058 23EW2
+# Designed and built by Daniel Gorelkin IT-140-X2058 23EW2 (11/11/2023)
 
 # Define two options for the menu prompt to be chosen and called by user.
 menu_prompt = ('To move: \t\t"N"-north, "S"-south, "E"-east, "W"-west \n'
@@ -15,9 +15,9 @@ rooms = {
                        'east': 'None', 'west': 'None'},
     'IT': {'name': 'IT', 'num': 2, 'item': 'laptop', 'north': 'Social Studies', 'south': 'None', 'east': 'Math',
            'west': 'None'},
-    'Math': {'name': 'Math', 'num': 3, 'item': 'Calculator', 'north': 'Lobby', 'south': 'None', 'east': 'Physics',
+    'Math': {'name': 'Math', 'num': 3, 'item': 'calculator', 'north': 'Lobby', 'south': 'None', 'east': 'Physics',
              'west': 'IT'},
-    'Chemistry': {'name': 'Chemistry', 'num': 4, 'item': 'Beaker', 'north': 'None', 'south': 'Physics', 'east': 'None',
+    'Chemistry': {'name': 'Chemistry', 'num': 4, 'item': 'beaker', 'north': 'None', 'south': 'Physics', 'east': 'None',
                   'west': 'None'},
     'Physics': {'name': 'Physics', 'num': 5, 'item': 'magnet', 'north': 'Chemistry', 'south': 'None', 'east': 'None',
                 'west': 'Math'},
@@ -26,7 +26,9 @@ rooms = {
     'Chancellor': {'name': 'Chancellor', 'num': 7, 'item': 'None', 'north': 'None', 'south': 'None', 'east': 'History',
                    'west': 'None'},
     # Define placeholder for room navigation track.
-    'Temp_room': {'name': 'Lobby', 'num': 8, 'instructions': True}
+    'Temp_room': {'name': 'Lobby', 'instructions': True},
+    'Inventory': {'Social Studies': 'None', 'IT': 'None', 'Math': 'None', 'Chemistry': 'None', 'Physics': 'None',
+                  'History': 'None'}
 }
 
 # Print the initial main menu and the game commands instructions.
@@ -45,11 +47,43 @@ def instructions():
 
 # Define the current room location print block.
 def print_room():
-    # Pulls data from global room dict.
-    print(f'You are in the', rooms[rooms['Temp_room']['name']]['name'], f'room')
     # Set modular active decoration.
-    print(3*"=", 3*"=", 2*"=", 3*"=", len(rooms[rooms['Temp_room']['name']]['name']) * "=", 4*"=",
-          end='\n\n')
+    print()
+    print(3*"=", 3*"=", 2*"=", 3*"=", len(rooms[rooms['Temp_room']['name']]['name']) * "=", 5*"=",
+          end='\n')
+    # Pulls data from global room dict.
+    print(f'You are in the', rooms[rooms['Temp_room']['name']]['name'], f'room.')
+
+    # ------------------------------------------------------------------------------------------
+    room = rooms['Temp_room']['name']
+    room_item = rooms[room]['item']
+    if room_item != 'None':
+        print('You see a {}.'.format(room_item))
+        print('To get it, enter "Get {}".'.format(room_item))
+    # ------------------------------------------------------------------------------------------
+
+    # Present inventory on hand and to collect.
+    inventory_items = []  # Set list to store collected items
+    counter = 0  # Set counter to count collected items
+    # Iterate through the items collected from inventory dict
+    rooms['Inventory'].values()
+    len_counter = 0  # Counter for Underline decoration
+    for item in rooms['Inventory'].values():
+        if item == 'None':  # Skip uncollected items
+            continue
+        else:
+            len_counter += len(item) + 4
+            inventory_items.append(item)  # Add collected items to the list and update counter
+            counter += 1  # Present items to be collected
+            # If counter reaches '6', means 6 items were collected and the game is over.
+            if counter == 6:
+                # Print winning statement and quit.
+                print('\nCongratulation! You Won and managed to escape from SNHU!\n'
+                      'Thanks for playing the game. Hope you enjoyed it.')
+                exit()
+
+    print('Your inventory:{} {}/6 collected.'.format(inventory_items, counter))  # Dynamic printout statement.
+    print(4 * "=", 9 * "=", len_counter * "=", 14 * "=", end='\n\n')  # Dynamic decoration printout.
 
 # Define the room travel block. Keeps track of room location.
 def update_room(c_room, move_room):  # Receives Current room, and direction command.
@@ -58,13 +92,28 @@ def update_room(c_room, move_room):  # Receives Current room, and direction comm
         rooms['Temp_room']['name'] = rooms[c_room][move_room]
     else:
         # Print prompt and send back to the command block.
-        print("I'm sorry. You can’t go that way!\n")
+        print("I'm sorry. You can’t go that way!")
         main()
     main()
 
+# define inventory management function 'inventory'
+def inventory(room, command):
+    tmp_item = rooms[room]['item']
+    item = command.split()
+    if len(item) == 2 and item[0] == 'get' and item[-1] == tmp_item:
+        rooms[room]['item'] = 'None'
+        rooms['Inventory'][room] = item[-1]
+        input('\nYou got the {}!\n'.format(item[-1]))
+        return
+    else:
+        input('Please type in "Get {}" to pick up the item.'.format(tmp_item))
+        main()
+
+
+# ------------------------------------------------------------------------------------------------------
+
 # Define the game commands block with optional argument reception.
 def main(*prompt):
-
     # Run initial game instructions once only. Could be called through 'help' input.
     if rooms['Temp_room']['instructions']:
         rooms['Temp_room']['instructions'] = False
@@ -104,8 +153,11 @@ def main(*prompt):
         instructions()
     elif command == 'expand':
         main(1)  # Send change prompt argument to the command block.
+    elif 'get' in command:
+        inventory(rooms['Temp_room']['name'], command)
+        main()
     else:  # Repeat command loop if input is invalid.
-        print('"' + command + '"' + ' is unrecognized command.\n')
+        print('\n"' + command + '"' + ' is unrecognized command.')
         main()
 
 # Run program by demand.
