@@ -1,3 +1,4 @@
+# Designed and built by Daniel Gorelkin IT-140-X2058 23EW2
 
 # Define two options for the menu prompt to be chosen and called by user.
 menu_prompt = ('To move: \t\t"N"-north, "S"-south, "E"-east, "W"-west \n'
@@ -25,7 +26,7 @@ rooms = {
     'Chancellor': {'name': 'Chancellor', 'num': 7, 'item': 'None', 'north': 'None', 'south': 'None', 'east': 'History',
                    'west': 'None'},
     # Define placeholder for room navigation track.
-    'Temp_room': {'name': 'Lobby', 'num': 8}
+    'Temp_room': {'name': 'Lobby', 'num': 8, 'instructions': True}
 }
 
 # Print the initial main menu and the game commands instructions.
@@ -40,10 +41,35 @@ def instructions():
     # Set pause button to enter the game.
     input("Press Enter to Continue")
     print(23 * "=", end='\n\n')  # Decoration
-    commands()  # Sends the controls to the commands block.
+    main()  # Sends the controls to the commands block.
+
+# Define the current room location print block.
+def print_room():
+    # Pulls data from global room dict.
+    print(f'You are in the', rooms[rooms['Temp_room']['name']]['name'], f'room')
+    # Set modular active decoration.
+    print(3*"=", 3*"=", 2*"=", 3*"=", len(rooms[rooms['Temp_room']['name']]['name']) * "=", 4*"=",
+          end='\n\n')
+
+# Define the room travel block. Keeps track of room location.
+def update_room(c_room, move_room):  # Receives Current room, and direction command.
+    if rooms[c_room][move_room] != 'None':  # Validates adjacent room location.
+        # If requested room is available, update room location in the global room dict.
+        rooms['Temp_room']['name'] = rooms[c_room][move_room]
+    else:
+        # Print prompt and send back to the command block.
+        print("I'm sorry. You can’t go that way!\n")
+        main()
+    main()
 
 # Define the game commands block with optional argument reception.
-def commands(*prompt):
+def main(*prompt):
+
+    # Run initial game instructions once only. Could be called through 'help' input.
+    if rooms['Temp_room']['instructions']:
+        rooms['Temp_room']['instructions'] = False
+        instructions()
+
     # Allows user to set his own prompt menu preferences to be displayed.
     for item in prompt:
         prompt = item
@@ -73,34 +99,16 @@ def commands(*prompt):
     # Additional commands filter to leave the game, swap prompt or pull initial instructions.
     elif command == 'quit':
         print("\nSo sorry so to see you leaving. See you next round!")
+        exit()
     elif command == 'help':
         instructions()
     elif command == 'expand':
-        commands(1)  # Send change prompt argument to the command block.
+        main(1)  # Send change prompt argument to the command block.
     else:  # Repeat command loop if input is invalid.
         print('"' + command + '"' + ' is unrecognized command.\n')
-        commands()
-
-# Define the current room location print block.
-def print_room():
-    # Pulls data from global room dict.
-    print(f'You are in the', rooms[rooms['Temp_room']['name']]['name'], f'room')
-    # Set modular active decoration.
-    print(3*"=", 3*"=", 2*"=", 3*"=", len(rooms[rooms['Temp_room']['name']]['name']) * "=", 4*"=",
-          end='\n\n')
-
-# Define the room travel block. Keeps track of room location.
-def update_room(c_room, move_room):  # Receives Current room, and direction command.
-    if rooms[c_room][move_room] != 'None':  # Validates adjacent room location.
-        # If requested room is available, update room location in the global room dict.
-        rooms['Temp_room']['name'] = rooms[c_room][move_room]
-    else:
-        # Print prompt and send back to the command block.
-        print("I'm sorry. You can’t go that way!\n")
-        commands()
-    commands()
+        main()
 
 # Run program by demand.
 if __name__ == '__main__':
     # Call initial instructions block and start the game.
-    instructions()
+    main()
