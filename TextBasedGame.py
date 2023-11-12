@@ -109,7 +109,7 @@ def show_status(c_room, move_room):  # Receives Current room, and direction comm
                 exit()
     else:
         # Print prompt and send back to the command block.
-        input("I'm sorry. You can’t go that way!")
+        print("\nI'm sorry. You can’t go this way!")
         main()
     main()
 
@@ -122,14 +122,18 @@ def inventory(room, command):
     if len(item) == 2 and item[0] == 'get' and item[-1] == tmp_item:
         rooms[room]['item'] = 'None'  # Removes the item from its room.
         rooms['Inventory'][room] = item[-1]  # Transfers the item into the inventory dict.
-        input('\nYou got the {}!\n'.format(item[-1]))  # Updates user about the picked up item
+        input('\nYou got the {}!'.format(item[-1]))  # Updates user about the picked up item
         return
     else:
-        input('Please type in "Get {}" to pick up the item.'.format(tmp_item))  # Update message with guidance.
-        main()  # Call/return to main function
+        if room == 'Lobby':  # If user tries to collect item from the Lobby
+            print("\nThere are no items to collect from the Lobby. Try another room.")  # Print prompt and call 'main' function
+            main()  # Return to main function
+        else:
+            input('Please type in "Get {}" to pick up the item.'.format(tmp_item))  # Update message with guidance.
+            main()  # Return to main function
 
 
-# Define the game commands block with optional argument reception.
+# Define main block with optional argument reception.
 def main(*prompt):
     # Run initial game instructions once only. Could be called through 'help' input.
     if rooms['Temp_room']['instructions']:
@@ -149,32 +153,48 @@ def main(*prompt):
         text = menu_prompt  # Sets the menu
     else:
         text = short_menu_prompt  # Sets the menu
-    command = input(text).lower().strip()  # Read user command input with embedded prompt and store it.
 
-    # Command filter block.
-    if command != 'quit':  # For every command besides 'quit' do the following:
-        # If navigation commands (e/s/n/w) received, CALL update_room function and pass room + navigation values'''
-        if command == 'e':
-            show_status(rooms['Temp_room']['name'], 'east')
-        elif command == 's':
-            show_status(rooms['Temp_room']['name'], 'south')
-        elif command == 'n':
-            show_status(rooms['Temp_room']['name'], 'north')
-        elif command == 'w':
-            show_status(rooms['Temp_room']['name'], 'west')
-        # Additional commands filter to swap prompt or pull initial instructions.
-        elif command == 'help':
-            instructions()
-        elif command == 'expand':
-            main(1)  # Send change prompt argument to the command block.
-        elif 'get' in command:
-            inventory(rooms['Temp_room']['name'], command)  # If command is get item: CALL 'inventory' and send args
-            main()
-        else:  # Repeat command loop if input is invalid.
-            print('\n"' + command + '"' + ' is unrecognized command.')
-            main()
-    # If command is 'quit'
-    print("\nSo sorry to see you leaving. See you next round!")
+    # Call the 'command' function and pass user's optional prompt
+    commands(text)
+
+
+# Define commands block with chosen user prompt.
+def commands(text):
+    repeat = True  # Set boolean to run the while loop
+    # Run the while loop until valid input is seen
+    while repeat:
+        command = input(text).lower().strip()  # Read user input command with embedded prompt and store it.
+        # Command filter block.
+        if command != 'quit':  # For every command besides 'quit' do the following:
+            # If navigation commands (e/s/n/w) received, CALL update_room function and pass room + navigation values.
+            if command == 'e':
+                show_status(rooms['Temp_room']['name'], 'east')
+            elif command == 's':
+                show_status(rooms['Temp_room']['name'], 'south')
+            elif command == 'n':
+                show_status(rooms['Temp_room']['name'], 'north')
+            elif command == 'w':
+                show_status(rooms['Temp_room']['name'], 'west')
+
+            # Additional commands filter to swap prompt or pull initial instructions.
+            elif command == 'help':
+                instructions()
+            elif command == 'expand':
+                main(1)  # Send change prompt argument to the command block.
+
+            # If command is get item: CALL 'inventory' and send args
+            elif 'get' in command:
+                # call inventory function and pass room name and users' command.
+                inventory(rooms['Temp_room']['name'], command)
+                # Return to main() if item was picked up successfully.
+                main()
+            else:  # Repeat command loop if input is invalid.
+                print('\n"' + command + '"' + ' is unrecognized command.\nEnter your next command.\n')
+        else:
+            # If command is 'quit', break the while loop
+            repeat = False
+            # Print prompt, and end the program.
+            print("\nSo sorry to see you leaving. See you next round!")
     exit()
 
 # Run program by demand.
