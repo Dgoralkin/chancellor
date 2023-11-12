@@ -50,7 +50,7 @@ def instructions():
 
 
 # Define the current room location print block.
-def print_room():
+def show_status():
     # Set modular active decoration.
     print()
     print(3*"=", 3*"=", 2*"=", 3*"=", len(rooms[rooms['Temp_room']['name']]['name']) * "=", 5*"=",
@@ -90,7 +90,7 @@ def print_room():
 
 
 # Define the room travel block. Keeps track of room location.
-def show_status(c_room, move_room):  # Receives Current room, and direction command.
+def update_room(c_room, move_room):  # Receives Current room, and direction command.
     if rooms[c_room][move_room] != 'None':  # Validates adjacent room location.
         # If requested room is available, update room location in the global room dict.
         rooms['Temp_room']['name'] = rooms[c_room][move_room]
@@ -146,7 +146,7 @@ def main(*prompt):
         prompt = item
 
     # Call function to print out current room location
-    print_room()
+    show_status()
     print("Enter your command:")  # Initial display prompt.
 
     # User Prompt chooser element. Checks and sets preset or user defined prompt template.
@@ -161,33 +161,25 @@ def main(*prompt):
 
 # Define commands block with chosen user prompt.
 def commands(text):
+    direction = {'e': 'east', 'w': 'west', 'n': 'north', 's': 'south', }
     repeat = True  # Set boolean to run the while loop
     # Run the while loop until valid input is seen
     while repeat:
         command = input(text).lower().strip()  # Read user input command with embedded prompt and store it.
         # Command filter block.
         if command != 'quit':  # For every command besides 'quit' do the following:
-
-            # If navigation commands (e/s/n/w) received, CALL show_status function and pass room + navigation values.
-            match command:
-                case 'e':
-                    show_status(rooms['Temp_room']['name'], 'east')
-                case 'w':
-                    show_status(rooms['Temp_room']['name'], 'west')
-                case 'n':
-                    show_status(rooms['Temp_room']['name'], 'north')
-                case 's':
-                    show_status(rooms['Temp_room']['name'], 'south')
+            # If navigation commands (e/s/n/w) received, CALL update_room function and pass room + navigation values.
+            if command == 'e' or command == 'w' or command == 's' or command == 'n':
+                update_room(rooms['Temp_room']['name'], direction[command])
 
             # Additional commands filter to swap prompt or pull initial instructions.
-            match command:
-                case 'help':  # If help is called: CALL instructions.
-                    instructions()
-                case 'expand':
-                    main(1)  # Send change prompt argument to the main block.
+            elif command == 'help':
+                instructions()
+            elif command == 'expand':
+                main(1)  # Send change prompt argument to the command block.
 
             # If command is get item: CALL 'inventory' and send args
-            if 'get' in command:
+            elif 'get' in command:
                 # call inventory function and pass room name and users' command.
                 inventory(rooms['Temp_room']['name'], command)
                 # Return to main() if item was picked up successfully.
