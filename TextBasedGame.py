@@ -126,7 +126,8 @@ def inventory(room, command):
         return
     else:
         if room == 'Lobby':  # If user tries to collect item from the Lobby
-            print("\nThere are no items to collect from the Lobby. Try another room.")  # Print prompt and call 'main' function
+            # Print prompt for Lobby room and call 'main' function
+            print("\nThere are no items to collect from the Lobby. Try another room.")
             main()  # Return to main function
         else:
             input('Please type in "Get {}" to pick up the item.'.format(tmp_item))  # Update message with guidance.
