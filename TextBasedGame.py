@@ -161,6 +161,7 @@ def main(*prompt):
 
 # Define commands block with chosen user prompt.
 def commands(text):
+    # create dict to translate directions.
     direction = {'e': 'east', 'w': 'west', 'n': 'north', 's': 'south', }
     repeat = True  # Set boolean to run the while loop
     # Run the while loop until valid input is seen
