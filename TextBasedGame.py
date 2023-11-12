@@ -167,24 +167,27 @@ def commands(text):
         command = input(text).lower().strip()  # Read user input command with embedded prompt and store it.
         # Command filter block.
         if command != 'quit':  # For every command besides 'quit' do the following:
-            # If navigation commands (e/s/n/w) received, CALL update_room function and pass room + navigation values.
-            if command == 'e':
-                show_status(rooms['Temp_room']['name'], 'east')
-            elif command == 's':
-                show_status(rooms['Temp_room']['name'], 'south')
-            elif command == 'n':
-                show_status(rooms['Temp_room']['name'], 'north')
-            elif command == 'w':
-                show_status(rooms['Temp_room']['name'], 'west')
+
+            # If navigation commands (e/s/n/w) received, CALL show_status function and pass room + navigation values.
+            match command:
+                case 'e':
+                    show_status(rooms['Temp_room']['name'], 'east')
+                case 'w':
+                    show_status(rooms['Temp_room']['name'], 'west')
+                case 'n':
+                    show_status(rooms['Temp_room']['name'], 'north')
+                case 's':
+                    show_status(rooms['Temp_room']['name'], 'south')
 
             # Additional commands filter to swap prompt or pull initial instructions.
-            elif command == 'help':
-                instructions()
-            elif command == 'expand':
-                main(1)  # Send change prompt argument to the command block.
+            match command:
+                case 'help':  # If help is called: CALL instructions.
+                    instructions()
+                case 'expand':
+                    main(1)  # Send change prompt argument to the main block.
 
             # If command is get item: CALL 'inventory' and send args
-            elif 'get' in command:
+            if 'get' in command:
                 # call inventory function and pass room name and users' command.
                 inventory(rooms['Temp_room']['name'], command)
                 # Return to main() if item was picked up successfully.
